@@ -34,5 +34,5 @@ public sealed interface TranslationStore permits TranslationStoreImpl {
 
   void deleteByKeyAndLocale(final TranslationKey key, final Locale locale);
 
-  @Nullable Translation findByKeyAndLocale(final TranslationKey key, final Locale locale);
+  Translation findByKeyAndLocale(final TranslationKey key, final Locale locale);
 }

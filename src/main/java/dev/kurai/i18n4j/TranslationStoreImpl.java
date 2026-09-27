@@ -95,12 +95,12 @@ final class TranslationStoreImpl implements TranslationStore {
   }
 
   @Override
-  public @Nullable Translation findByKeyAndLocale(final TranslationKey key, final Locale locale) {
+  public Translation findByKeyAndLocale(final TranslationKey key, final Locale locale) {
     return this.translations.stream()
         .filter(
             translation ->
                 translation.key().key().equals(key.key()) && translation.locale() == locale)
         .findFirst()
-        .orElse(null);
+        .orElse(new TranslationImpl(key, locale, key.key()));
   }
 }
