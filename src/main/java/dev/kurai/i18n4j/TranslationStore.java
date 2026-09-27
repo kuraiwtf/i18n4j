@@ -16,7 +16,23 @@ public sealed interface TranslationStore permits TranslationStoreImpl {
 
   Collection<Translation> findAllByLocale(final Locale locale);
 
-  void insert(final Collection<Translation> translations);
+  void insertOne(final Translation translation);
+
+  void insertMany(final Translation... translations);
+
+  void insertMany(final Collection<Translation> translations);
+
+  void updateOne(final Translation translation);
+
+  void updateMany(final Translation... translations);
+
+  void updateMany(final Collection<Translation> translations);
+
+  void deleteByKey(final TranslationKey key);
+
+  void deleteByLocale(final Locale locale);
+
+  void deleteByKeyAndLocale(final TranslationKey key, final Locale locale);
 
   @Nullable Translation findByKeyAndLocale(final TranslationKey key, final Locale locale);
 }

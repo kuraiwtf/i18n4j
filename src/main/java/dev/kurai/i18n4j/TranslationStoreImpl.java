@@ -35,8 +35,63 @@ final class TranslationStoreImpl implements TranslationStore {
   }
 
   @Override
-  public void insert(final Collection<Translation> translations) {
-    this.translations.addAll(translations);
+  public void insertOne(final Translation translation) {
+    if (this.findByKeyAndLocale(translation.key(), translation.locale()) != null) {
+      throw new IllegalArgumentException("Translation already exists");
+    }
+
+    this.translations.add(translation);
+  }
+
+  @Override
+  public void insertMany(final Translation... translations) {
+    for (final Translation translation : translations) {
+      this.insertOne(translation);
+    }
+  }
+
+  @Override
+  public void insertMany(final Collection<Translation> translations) {
+    translations.forEach(this::insertOne);
+  }
+
+  @Override
+  public void updateOne(final Translation translation) {
+    final var existing = this.findByKeyAndLocale(translation.key(), translation.locale());
+    if (existing == null) {
+      throw new IllegalArgumentException("Translation does not exist");
+    }
+
+    this.translations.remove(existing);
+    this.translations.add(translation);
+  }
+
+  @Override
+  public void updateMany(final Translation... translations) {
+    for (final Translation translation : translations) {
+      this.updateOne(translation);
+    }
+  }
+
+  @Override
+  public void updateMany(final Collection<Translation> translations) {
+    translations.forEach(this::updateOne);
+  }
+
+  @Override
+  public void deleteByKey(final TranslationKey key) {
+    this.translations.removeIf(translation -> translation.key().key().equals(key.key()));
+  }
+
+  @Override
+  public void deleteByLocale(final Locale locale) {
+    this.translations.removeIf(translation -> translation.locale() == locale);
+  }
+
+  @Override
+  public void deleteByKeyAndLocale(final TranslationKey key, final Locale locale) {
+    this.translations.removeIf(
+        translation -> translation.key().key().equals(key.key()) && translation.locale() == locale);
   }
 
   @Override
