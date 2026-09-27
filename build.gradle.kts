@@ -15,9 +15,9 @@ repositories {
 }
 
 dependencies {
-  implementation("org.json:json:20260814")
-  implementation("org.jspecify:jspecify:1.0.1")
-  implementation("com.google.guava:guava:33.7.1-jre")
+  api("org.json:json:20260814")
+  api("org.jspecify:jspecify:1.0.1")
+  api("com.google.guava:guava:33.7.1-jre")
 }
 
 publishing {
