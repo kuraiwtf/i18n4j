@@ -22,6 +22,13 @@ import java.util.function.IntFunction;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * Reads translations from a <a href="https://crowdin.com/">Crowdin</a> project, using each
+ * source string's identifier as its {@link dev.kurai.i18n4j.TranslationKey} and pulling every
+ * target language's approved translations alongside the source language.
+ *
+ * <p>For plural strings, only the {@code other} plural form is used.
+ */
 @NullMarked
 public final class CrowdinTranslationProvider implements TranslationProvider<Client> {
 
@@ -30,10 +37,22 @@ public final class CrowdinTranslationProvider implements TranslationProvider<Cli
 
   private final long projectId;
 
+  /**
+   * Creates a new Crowdin translation provider for the given project.
+   *
+   * @param projectId the id of the Crowdin project to read translations from
+   */
   public CrowdinTranslationProvider(final long projectId) {
     this.projectId = projectId;
   }
 
+  /**
+   * Reads the source strings and every target language's translations from the configured
+   * Crowdin project.
+   *
+   * @param source the Crowdin client to read translations with
+   * @return the translations found in the project
+   */
   @Override
   public Collection<Translation> provideTranslations(final Client source) {
     final Project project = source.getProjectsGroupsApi().getProject(this.projectId).getData();

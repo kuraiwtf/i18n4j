@@ -19,6 +19,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+/**
+ * Reads translations from a JSON file whose root is an array of objects, each with a {@code
+ * key}, a {@code locale} and a {@code content} field, e.g.:
+ *
+ * <pre>{@code
+ * [
+ *   { "key": "menu.title", "locale": "en_US", "content": "Menu" }
+ * ]
+ * }</pre>
+ */
 final class JsonTranslationProvider extends FileTranslationProvider {
 
   JsonTranslationProvider() {
