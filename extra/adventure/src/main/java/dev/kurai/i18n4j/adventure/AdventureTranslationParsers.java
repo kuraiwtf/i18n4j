@@ -6,10 +6,10 @@ import net.kyori.adventure.text.Component;
 
 public final class AdventureTranslationParsers {
 
-  public static final TranslationParser<Audience, Component> COMPONENT =
+  public static final TranslationParser<Component> COMPONENT =
       new ComponentTranslationParser();
 
-  public static final TranslationParser<Audience, Component> MINI_MESSAGE =
+  public static final TranslationParser<Component> MINI_MESSAGE =
       new MiniMessageTranslationParser();
 
   private AdventureTranslationParsers() {}
