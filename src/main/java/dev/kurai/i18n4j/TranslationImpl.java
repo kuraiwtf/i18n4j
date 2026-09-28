@@ -14,10 +14,10 @@ public record TranslationImpl(TranslationKey key, Locale locale, String content)
 
   @Override
   public String format(final TranslationArgument[] arguments) {
-    final String result = this.content;
+    String result = this.content;
 
     for (final TranslationArgument argument : arguments) {
-      return result.replace('{' + argument.key() + '}', argument.value());
+      result = result.replace('{' + argument.key() + '}', argument.value());
     }
 
     return result;
