@@ -51,11 +51,11 @@ repositories {
 }
 
 dependencies {
-  implementation("dev.kurai.i18n4j:i18n4j:0.0.1")
+  implementation("dev.kurai.i18n4j:i18n4j:VERSION")
 
   // Optional modules
-  implementation("dev.kurai.i18n4j:extra-adventure:0.0.1")
-  implementation("dev.kurai.i18n4j:extra-crowdin:0.0.1")
+  implementation("dev.kurai.i18n4j:extra-adventure:VERSION")
+  implementation("dev.kurai.i18n4j:extra-crowdin:VERSION")
 }
 ```
 
@@ -75,7 +75,7 @@ dependencies {
 <dependency>
   <groupId>dev.kurai.i18n4j</groupId>
   <artifactId>i18n4j</artifactId>
-  <version>0.0.1</version>
+  <version>VERSION</version>
 </dependency>
 ```
 
