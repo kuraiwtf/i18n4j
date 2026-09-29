@@ -15,7 +15,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -47,10 +46,11 @@ public final class TolgeeTranslationProvider implements TranslationProvider<Tolg
     }
 
     String url =
-        source.projectPath()
-            + "/translations/"
-            + String.join(",", languages.stream().map(TolgeeTranslationProvider::encode).toList())
-            + "?structureDelimiter=";
+        "%s/translations/%s?structureDelimiter="
+            .formatted(
+                source.projectPath(),
+                String.join(
+                    ",", languages.stream().map(TolgeeTranslationProvider::encode).toList()));
     if (this.namespace != null) {
       url += "&ns=" + encode(this.namespace);
     }

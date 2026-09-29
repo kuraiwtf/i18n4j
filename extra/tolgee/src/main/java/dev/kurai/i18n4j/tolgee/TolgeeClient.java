@@ -6,20 +6,20 @@ import static java.util.Objects.requireNonNull;
 
 public final class TolgeeClient {
 
+  public static Builder builder() {
+    return new Builder();
+  }
+
   private final String baseUrl;
   private final String apiKey;
 
   private final @Nullable Long projectId;
 
-  private TolgeeClient(final Builder builder) {
-    this.baseUrl = requireNonNull(builder.baseUrl, "baseUrl must not be null");
-    this.apiKey = requireNonNull(builder.apiKey, "apiKey must not be null");
+  private TolgeeClient(final String baseUrl, final String apiKey, final @Nullable Long projectId) {
+    this.baseUrl = requireNonNull(baseUrl, "baseUrl must not be null");
+    this.apiKey = requireNonNull(apiKey, "apiKey must not be null");
 
-    this.projectId = builder.projectId;
-  }
-
-  public static Builder builder() {
-    return new Builder();
+    this.projectId = projectId;
   }
 
   public String baseUrl() {
@@ -66,7 +66,7 @@ public final class TolgeeClient {
     }
 
     public TolgeeClient build() {
-      return new TolgeeClient(this);
+      return new TolgeeClient(this.baseUrl, this.apiKey, this.projectId);
     }
   }
 }
