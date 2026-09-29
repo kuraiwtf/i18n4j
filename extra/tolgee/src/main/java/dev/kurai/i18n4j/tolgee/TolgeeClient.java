@@ -1,8 +1,8 @@
 package dev.kurai.i18n4j.tolgee;
 
-import org.jspecify.annotations.Nullable;
-
 import static java.util.Objects.requireNonNull;
+
+import org.jspecify.annotations.Nullable;
 
 public final class TolgeeClient {
 
@@ -10,8 +10,7 @@ public final class TolgeeClient {
     return new Builder();
   }
 
-  private final String baseUrl;
-  private final String apiKey;
+  private final String baseUrl, apiKey;
 
   private final @Nullable Long projectId;
 
@@ -43,8 +42,7 @@ public final class TolgeeClient {
 
     private static final String DEFAULT_BASE_URL = "https://app.tolgee.io";
 
-    private String baseUrl = DEFAULT_BASE_URL;
-    private String apiKey;
+    private @Nullable String baseUrl = DEFAULT_BASE_URL, apiKey;
 
     private @Nullable Long projectId;
 
@@ -66,7 +64,10 @@ public final class TolgeeClient {
     }
 
     public TolgeeClient build() {
-      return new TolgeeClient(this.baseUrl, this.apiKey, this.projectId);
+      return new TolgeeClient(
+          requireNonNull(this.baseUrl, "Base URL cannot be null"),
+          requireNonNull(this.apiKey, "API Key cannot be null"),
+          this.projectId);
     }
   }
 }
