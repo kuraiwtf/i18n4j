@@ -48,5 +48,5 @@ public sealed interface Translation extends Keyed<TranslationKey> permits Transl
    * @param arguments the arguments to substitute into the content
    * @return the formatted content
    */
-  String format(final TranslationArgument[] arguments);
+  String format(final TranslationArgument... arguments);
 }
