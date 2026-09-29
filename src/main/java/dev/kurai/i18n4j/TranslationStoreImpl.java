@@ -1,29 +1,36 @@
 package dev.kurai.i18n4j;
 
+import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
+import org.jspecify.annotations.Nullable;
 
 final class TranslationStoreImpl implements TranslationStore {
 
-  private final Table<TranslationKey, Locale, Translation> translations;
-  private final Collection<Translation> translationView;
+  private static final String TRANSLATION_CANNOT_BE_NULL = "Translation cannot be null",
+      TRANSLATIONS_CANNOT_BE_NULL = "Translations cannot be null",
+      TRANSLATION_KEY_CANNOT_BE_NULL = "Translation key cannot be null",
+      LOCALE_CANNOT_BE_NULL = "Locale cannot be null";
 
-  TranslationStoreImpl() {
-    this.translations = HashBasedTable.create();
-    this.translationView = Collections.unmodifiableCollection(this.translations.values());
-  }
+  private final Table<TranslationKey, Locale, Translation> translations;
+  private final Collection<Translation> translationsView =
+      Collections.unmodifiableCollection((this.translations = HashBasedTable.create()).values());
 
   @Override
   public Collection<Translation> findAll() {
-    return this.translationView;
+    return this.translationsView;
   }
 
   @Override
-  public Collection<Translation> findAllByKey(final TranslationKey key) {
-    return this.translations.row(key).values();
+  public Collection<Translation> findAllByKey(final TranslationKey translationKey) {
+    return this.translations
+        .row(requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL))
+        .values();
   }
 
   @Override
@@ -33,72 +40,88 @@ final class TranslationStoreImpl implements TranslationStore {
 
   @Override
   public void insertOne(final Translation translation) {
-    if (this.exists(translation.key(), translation.locale())) {
+    requireNonNull(translation, TRANSLATION_CANNOT_BE_NULL);
+
+    final TranslationKey translationKey = translation.key();
+    final Locale locale = translation.locale();
+
+    if (this.exists(translationKey, locale)) {
       throw new IllegalArgumentException("Translation already exists");
     }
 
-    this.translations.put(translation.key(), translation.locale(), translation);
+    this.translations.put(translationKey, locale, translation);
   }
 
   @Override
   public void insertMany(final Translation... translations) {
+    this.insertMany(asList(translations));
+  }
+
+  @Override
+  public void insertMany(final Iterable<Translation> translations) {
+    requireNonNull(translations, TRANSLATIONS_CANNOT_BE_NULL);
+
     for (final Translation translation : translations) {
       this.insertOne(translation);
     }
   }
 
   @Override
-  public void insertMany(final Collection<Translation> translations) {
-    translations.forEach(this::insertOne);
-  }
-
-  @Override
   public void updateOne(final Translation translation) {
-    if (!this.exists(translation.key(), translation.locale())) {
+    requireNonNull(translation, TRANSLATION_CANNOT_BE_NULL);
+
+    final TranslationKey translationKey = translation.key();
+    final Locale locale = translation.locale();
+
+    if (!this.exists(translationKey, locale)) {
       throw new IllegalArgumentException("Translation does not exist");
     }
 
-    this.translations.put(translation.key(), translation.locale(), translation);
+    this.translations.put(translationKey, locale, translation);
   }
 
   @Override
   public void updateMany(final Translation... translations) {
+    this.updateMany(asList(translations));
+  }
+
+  @Override
+  public void updateMany(final Iterable<Translation> translations) {
+    requireNonNull(translations, TRANSLATIONS_CANNOT_BE_NULL);
+
     for (final Translation translation : translations) {
       this.updateOne(translation);
     }
   }
 
   @Override
-  public void updateMany(final Collection<Translation> translations) {
-    translations.forEach(this::updateOne);
-  }
-
-  @Override
-  public void deleteByKey(final TranslationKey key) {
-    this.translations.row(key).clear();
+  public void deleteByKey(final TranslationKey translationKey) {
+    this.translations.row(requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL)).clear();
   }
 
   @Override
   public void deleteByLocale(final Locale locale) {
-    this.translations.column(locale).clear();
+    this.translations.column(requireNonNull(locale, LOCALE_CANNOT_BE_NULL)).clear();
   }
 
   @Override
-  public void deleteByKeyAndLocale(final TranslationKey key, final Locale locale) {
-    this.translations.remove(key, locale);
+  public void deleteByKeyAndLocale(final TranslationKey translationKey, final Locale locale) {
+    this.translations.remove(
+        requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL),
+        requireNonNull(locale, LOCALE_CANNOT_BE_NULL));
   }
 
-  private boolean exists(final TranslationKey key, final Locale locale) {
-    return this.translations.contains(key, locale);
+  private boolean exists(final TranslationKey translationKey, final Locale locale) {
+    return this.translations.contains(
+        requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL),
+        requireNonNull(locale, LOCALE_CANNOT_BE_NULL));
   }
 
   @Override
-  public Translation findByKeyAndLocale(final TranslationKey key, final Locale locale) {
-    final Translation found = this.translations.get(key, locale);
-    if (found == null) {
-      return new TranslationImpl(key, locale, key.key());
-    }
-
-    return found;
+  public @Nullable Translation findByKeyAndLocale(
+      final TranslationKey translationKey, final Locale locale) {
+    return this.translations.get(
+        requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL),
+        requireNonNull(locale, LOCALE_CANNOT_BE_NULL));
   }
 }

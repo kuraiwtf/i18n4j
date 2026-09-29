@@ -68,7 +68,7 @@ public sealed interface TranslationStore permits TranslationStoreImpl {
    * @throws IllegalArgumentException if a translation already exists for the same key and locale
    *     as one of the given translations
    */
-  void insertMany(final Collection<Translation> translations);
+  void insertMany(final Iterable<Translation> translations);
 
   /**
    * Replaces an existing translation in this store.
@@ -94,7 +94,7 @@ public sealed interface TranslationStore permits TranslationStoreImpl {
    * @throws IllegalArgumentException if no translation exists for the same key and locale as one
    *     of the given translations
    */
-  void updateMany(final Collection<Translation> translations);
+  void updateMany(final Iterable<Translation> translations);
 
   /**
    * Removes every translation stored under the given key, regardless of locale.
@@ -126,5 +126,5 @@ public sealed interface TranslationStore permits TranslationStoreImpl {
    * @param locale the locale to look up
    * @return the matching translation, or a fallback translation if none is stored
    */
-  Translation findByKeyAndLocale(final TranslationKey key, final Locale locale);
+  @Nullable Translation findByKeyAndLocale(final TranslationKey key, final Locale locale);
 }
