@@ -35,7 +35,7 @@ final class TranslationStoreImpl implements TranslationStore {
 
   @Override
   public Collection<Translation> findAllByLocale(final Locale locale) {
-    return this.translations.column(locale).values();
+    return this.translations.column(requireNonNull(locale, LOCALE_CANNOT_BE_NULL)).values();
   }
 
   @Override
