@@ -5,18 +5,11 @@ pluggable translation sources.
 
 ```java
 final TranslationStore store = TranslationStore.translationStore();
-
-store.
-
-insertOne(translation(translationKey("menu.title"),Locale.US,"Menu"));
-        store.
-
-insertOne(translation(translationKey("menu.title"),Locale.FRANCE,"Menu"));
+store.insertOne(translation(translationKey("menu.title"),Locale.US,"Menu"));
+store.insertOne(translation(translationKey("menu.title"),Locale.FRANCE,"Menu"));
 
 final Translation translation = store.findByKeyAndLocale(translationKey("menu.title"), Locale.US);
-System.out.
-
-println(translation.content()); // "Menu"
+System.out.println(translation.content()); // "Menu"
 ```
 
 ## Features
@@ -144,9 +137,7 @@ Render translations directly as Adventure `Component`s, either as plain text or 
 final Component component = AdventureTranslationParsers.MINI_MESSAGE.parse(
         translation, translationArgument("player", "Kurai"));
 
-audience.
-
-sendMessage(component);
+audience.sendMessage(component);
 ```
 
 ### Crowdin
@@ -156,9 +147,7 @@ Pull source strings and their translations straight from a
 
 ```java
 final TranslationProvider<Client> provider = new CrowdinTranslationProvider(projectId);
-store.
-
-insertMany(provider.provideTranslations(crowdinClient));
+store.insertMany(provider.provideTranslations(crowdinClient));
 ```
 
 ## Building
