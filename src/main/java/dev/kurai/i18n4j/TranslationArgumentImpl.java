@@ -1,3 +1,11 @@
 package dev.kurai.i18n4j;
 
-record TranslationArgumentImpl(String key, String value) implements TranslationArgument {}
+import static java.util.Objects.requireNonNull;
+
+record TranslationArgumentImpl(String key, String value) implements TranslationArgument {
+
+  TranslationArgumentImpl {
+    requireNonNull(key, "Argument key cannot be null");
+    requireNonNull(value, "Argument value cannot be null");
+  }
+}
