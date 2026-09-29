@@ -2,6 +2,7 @@ package dev.kurai.i18n4j.crowdin;
 
 import static dev.kurai.i18n4j.Translation.translation;
 import static dev.kurai.i18n4j.TranslationKey.translationKey;
+import static java.util.Objects.requireNonNull;
 
 import com.crowdin.client.Client;
 import com.crowdin.client.core.model.ResponseList;
@@ -34,38 +35,44 @@ public final class CrowdinTranslationProvider implements TranslationProvider<Cli
 
   private static <T> List<T> paginate(final IntFunction<ResponseList<T>> fetcher) {
     final List<T> result = new ArrayList<>();
+
     int offset = 0;
     while (true) {
       final List<ResponseObject<T>> page = fetcher.apply(offset).getData();
-      for (final ResponseObject<T> object : page) {
-        result.add(object.getData());
+
+      for (final ResponseObject<T> responseObject : page) {
+        result.add(responseObject.getData());
       }
+
       if (page.size() < PAGE_SIZE) {
         return result;
       }
+
       offset += PAGE_SIZE;
     }
   }
 
-  private static @Nullable Long stringIdOf(final LanguageTranslations entry) {
-    return switch (entry) {
+  private static @Nullable Long stringIdOf(final LanguageTranslations languageTranslations) {
+    return switch (languageTranslations) {
       case final PlainLanguageTranslations plain -> plain.getStringId();
       case final ICULanguageTranslations icu -> icu.getStringId();
       case final PluralLanguageTranslations plural -> plural.getStringId();
-      default -> throw new IllegalStateException("Unknown traduction type: " + entry.getClass());
+      default ->
+          throw new IllegalStateException(
+              "Unknown traduction type: " + languageTranslations.getClass());
     };
   }
 
-  private static @Nullable String extractText(final LanguageTranslations entry) {
-    return switch (entry) {
+  private static @Nullable String extractText(final LanguageTranslations languageTranslations) {
+    return switch (languageTranslations) {
       case final PlainLanguageTranslations plain -> plain.getText();
       case final ICULanguageTranslations icu -> icu.getText();
       case final PluralLanguageTranslations plural when plural.getPlurals() != null ->
-              plural.getPlurals().stream()
-                      .filter(form -> DEFAULT_PLURAL_FORM.equals(form.getPluralForm()))
-                      .map(PluralLanguageTranslations.Plurals::getText)
-                      .findFirst()
-                      .orElse(null);
+          plural.getPlurals().stream()
+              .filter(form -> DEFAULT_PLURAL_FORM.equals(form.getPluralForm()))
+              .map(PluralLanguageTranslations.Plurals::getText)
+              .findFirst()
+              .orElse(null);
       default -> null;
     };
   }
@@ -88,24 +95,26 @@ public final class CrowdinTranslationProvider implements TranslationProvider<Cli
    * Reads the source strings and every target language's translations from the configured Crowdin
    * project.
    *
-   * @param source the Crowdin client to read translations with
+   * @param client the Crowdin client to read translations with
    * @return the translations found in the project
    */
   @Override
-  public Collection<Translation> provideTranslations(final Client source) {
-    final Project project = source.getProjectsGroupsApi().getProject(this.projectId).getData();
-    final var translations = Lists.<Translation>newArrayList();
+  public Collection<Translation> provideTranslations(final Client client) {
+    requireNonNull(client, "Crowdin client cannot be null");
 
-    final var identifiers = Maps.<Long, String>newHashMap();
+    final Project project = client.getProjectsGroupsApi().getProject(this.projectId).getData();
     final Locale sourceLocale = Locale.forLanguageTag(project.getSourceLanguageId());
 
-    for (final SourceString string : this.fetchSourceStrings(source)) {
-      final String identifier = string.getIdentifier();
-      if (identifier != null) {
-        identifiers.put(string.getId(), identifier);
+    final var translations = Lists.<Translation>newArrayList();
+    final var identifiers = Maps.<Long, String>newHashMap();
 
-        if (string.getText() instanceof final String text) {
-          translations.add(translation(translationKey(identifier), sourceLocale, text));
+    for (final SourceString sourceString : this.fetchSourceStrings(client)) {
+      final String identifier = sourceString.getIdentifier();
+      if (identifier != null) {
+        identifiers.put(sourceString.getId(), identifier);
+
+        if (sourceString.getText() instanceof final String stringText) {
+          translations.add(translation(translationKey(identifier), sourceLocale, stringText));
         }
       }
     }
@@ -113,7 +122,7 @@ public final class CrowdinTranslationProvider implements TranslationProvider<Cli
     for (final String targetLanguageId : project.getTargetLanguageIds()) {
       final Locale targetLocale = Locale.forLanguageTag(targetLanguageId);
       for (final LanguageTranslations languageTranslation :
-          this.fetchLanguageTranslations(source, targetLanguageId)) {
+          this.fetchLanguageTranslations(client, targetLanguageId)) {
         final String text = extractText(languageTranslation),
             identifier = identifiers.get(stringIdOf(languageTranslation));
 
