@@ -23,14 +23,52 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Reads translations from a <a href="https://crowdin.com/">Crowdin</a> project, using each
- * source string's identifier as its {@link dev.kurai.i18n4j.TranslationKey} and pulling every
- * target language's approved translations alongside the source language.
+ * Reads translations from a <a href="https://crowdin.com/">Crowdin</a> project, using each source
+ * string's identifier as its {@link dev.kurai.i18n4j.TranslationKey} and pulling every target
+ * language's approved translations alongside the source language.
  *
  * <p>For plural strings, only the {@code other} plural form is used.
  */
 @NullMarked
 public final class CrowdinTranslationProvider implements TranslationProvider<Client> {
+
+  private static <T> List<T> paginate(final IntFunction<ResponseList<T>> fetcher) {
+    final List<T> result = new ArrayList<>();
+    int offset = 0;
+    while (true) {
+      final List<ResponseObject<T>> page = fetcher.apply(offset).getData();
+      for (final ResponseObject<T> object : page) {
+        result.add(object.getData());
+      }
+      if (page.size() < PAGE_SIZE) {
+        return result;
+      }
+      offset += PAGE_SIZE;
+    }
+  }
+
+  private static @Nullable Long stringIdOf(final LanguageTranslations entry) {
+    return switch (entry) {
+      case final PlainLanguageTranslations plain -> plain.getStringId();
+      case final ICULanguageTranslations icu -> icu.getStringId();
+      case final PluralLanguageTranslations plural -> plural.getStringId();
+      default -> throw new IllegalStateException("Unknown traduction type: " + entry.getClass());
+    };
+  }
+
+  private static @Nullable String extractText(final LanguageTranslations entry) {
+    return switch (entry) {
+      case final PlainLanguageTranslations plain -> plain.getText();
+      case final ICULanguageTranslations icu -> icu.getText();
+      case final PluralLanguageTranslations plural when plural.getPlurals() != null ->
+              plural.getPlurals().stream()
+                      .filter(form -> DEFAULT_PLURAL_FORM.equals(form.getPluralForm()))
+                      .map(PluralLanguageTranslations.Plurals::getText)
+                      .findFirst()
+                      .orElse(null);
+      default -> null;
+    };
+  }
 
   private static final int PAGE_SIZE = 500;
   private static final String DEFAULT_PLURAL_FORM = "other";
@@ -47,8 +85,8 @@ public final class CrowdinTranslationProvider implements TranslationProvider<Cli
   }
 
   /**
-   * Reads the source strings and every target language's translations from the configured
-   * Crowdin project.
+   * Reads the source strings and every target language's translations from the configured Crowdin
+   * project.
    *
    * @param source the Crowdin client to read translations with
    * @return the translations found in the project
@@ -58,16 +96,16 @@ public final class CrowdinTranslationProvider implements TranslationProvider<Cli
     final Project project = source.getProjectsGroupsApi().getProject(this.projectId).getData();
     final var translations = Lists.<Translation>newArrayList();
 
-    final var keys = Maps.<Long, String>newHashMap();
+    final var identifiers = Maps.<Long, String>newHashMap();
     final Locale sourceLocale = Locale.forLanguageTag(project.getSourceLanguageId());
 
     for (final SourceString string : this.fetchSourceStrings(source)) {
-      final String key = string.getIdentifier();
-      if (key != null) {
-        keys.put(string.getId(), key);
+      final String identifier = string.getIdentifier();
+      if (identifier != null) {
+        identifiers.put(string.getId(), identifier);
 
         if (string.getText() instanceof final String text) {
-          translations.add(translation(translationKey(key), sourceLocale, text));
+          translations.add(translation(translationKey(identifier), sourceLocale, text));
         }
       }
     }
@@ -76,11 +114,11 @@ public final class CrowdinTranslationProvider implements TranslationProvider<Cli
       final Locale targetLocale = Locale.forLanguageTag(targetLanguageId);
       for (final LanguageTranslations languageTranslation :
           this.fetchLanguageTranslations(source, targetLanguageId)) {
-        final String text = extractText(languageTranslation);
-        final String key = keys.get(stringIdOf(languageTranslation));
+        final String text = extractText(languageTranslation),
+            identifier = identifiers.get(stringIdOf(languageTranslation));
 
-        if (key != null && text != null) {
-          translations.add(translation(translationKey(key), targetLocale, text));
+        if (identifier != null && text != null) {
+          translations.add(translation(translationKey(identifier), targetLocale, text));
         }
       }
     }
@@ -109,44 +147,5 @@ public final class CrowdinTranslationProvider implements TranslationProvider<Cli
               .getStringTranslationsApi()
               .listLanguageTranslations(this.projectId, languageId, options);
         });
-  }
-
-  private static <T> List<T> paginate(final IntFunction<ResponseList<T>> fetcher) {
-    final List<T> result = new ArrayList<>();
-    int offset = 0;
-    while (true) {
-      final List<ResponseObject<T>> page = fetcher.apply(offset).getData();
-      for (final ResponseObject<T> object : page) {
-        result.add(object.getData());
-      }
-      if (page.size() < PAGE_SIZE) {
-        return result;
-      }
-      offset += PAGE_SIZE;
-    }
-  }
-
-  private static @Nullable Long stringIdOf(final LanguageTranslations entry) {
-    return switch (entry) {
-      case final PlainLanguageTranslations plain -> plain.getStringId();
-      case final ICULanguageTranslations icu -> icu.getStringId();
-      case final PluralLanguageTranslations plural -> plural.getStringId();
-      default ->
-          throw new IllegalStateException("Unknown traduction type: " + entry.getClass());
-    };
-  }
-
-  private static @Nullable String extractText(final LanguageTranslations entry) {
-    return switch (entry) {
-      case final PlainLanguageTranslations plain -> plain.getText();
-      case final ICULanguageTranslations icu -> icu.getText();
-      case final PluralLanguageTranslations plural when plural.getPlurals() != null ->
-          plural.getPlurals().stream()
-              .filter(form -> DEFAULT_PLURAL_FORM.equals(form.getPluralForm()))
-              .map(PluralLanguageTranslations.Plurals::getText)
-              .findFirst()
-              .orElse(null);
-      default -> null;
-    };
   }
 }
