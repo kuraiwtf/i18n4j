@@ -37,7 +37,8 @@ publishing {
       url = uri("https://maven.pkg.github.com/kuraiwtf/i18n4j")
       credentials {
         username = (project.findProperty("githubActor") ?: System.getenv("GITHUB_ACTOR")) as String?
-        password = (project.findProperty("githubPassword") ?: System.getenv("GITHUB_TOKEN")) as String?
+        password =
+            (project.findProperty("githubPassword") ?: System.getenv("GITHUB_TOKEN")) as String?
       }
     }
   }
