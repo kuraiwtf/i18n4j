@@ -8,6 +8,7 @@ import dev.kurai.i18n4j.TranslationStore;
 import java.util.Locale;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslator;
+import org.jspecify.annotations.Nullable;
 
 public final class BuiltinMiniMessageTranslator extends MiniMessageTranslator {
 
@@ -18,12 +19,12 @@ public final class BuiltinMiniMessageTranslator extends MiniMessageTranslator {
   }
 
   @Override
-  protected String getMiniMessageString(final String key, final Locale locale) {
+  protected @Nullable String getMiniMessageString(final String key, final Locale locale) {
     final Translation translation =
         this.translationStore.findByKeyAndLocale(translationKey(key), locale);
 
     if (translation == null) {
-      return key;
+      return null;
     }
 
     return translation.content();
