@@ -3,6 +3,7 @@ package dev.kurai.i18n4j.adventure;
 import static dev.kurai.i18n4j.TranslationKey.translationKey;
 import static java.util.Objects.requireNonNull;
 
+import dev.kurai.i18n4j.Translation;
 import dev.kurai.i18n4j.TranslationStore;
 import java.util.Locale;
 import net.kyori.adventure.key.Key;
@@ -18,7 +19,14 @@ public final class BuiltinMiniMessageTranslator extends MiniMessageTranslator {
 
   @Override
   protected String getMiniMessageString(final String key, final Locale locale) {
-    return this.translationStore.findByKeyAndLocale(translationKey(key), locale).content();
+    final Translation translation =
+        this.translationStore.findByKeyAndLocale(translationKey(key), locale);
+
+    if (translation == null) {
+      return key;
+    }
+
+    return translation.content();
   }
 
   @Override
