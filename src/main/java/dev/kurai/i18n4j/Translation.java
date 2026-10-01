@@ -1,5 +1,7 @@
 package dev.kurai.i18n4j;
 
+import static dev.kurai.i18n4j.TranslationKey.translationKey;
+
 import dev.kurai.i18n4j.util.Keyed;
 import java.util.Locale;
 
@@ -24,6 +26,10 @@ public sealed interface Translation extends Keyed<TranslationKey> permits Transl
     return new TranslationImpl(key, locale, content);
   }
 
+  static Translation translation(final String key, final Locale locale, final String content) {
+    return translation(translationKey(key), locale, content);
+  }
+
   @Override
   TranslationKey key();
 
@@ -42,8 +48,8 @@ public sealed interface Translation extends Keyed<TranslationKey> permits Transl
   String content();
 
   /**
-   * Formats this translation's {@linkplain #content() content}, substituting each {@code
-   * {key}} placeholder with the value of the matching argument.
+   * Formats this translation's {@linkplain #content() content}, substituting each {@code {key}}
+   * placeholder with the value of the matching argument.
    *
    * @param arguments the arguments to substitute into the content
    * @return the formatted content
