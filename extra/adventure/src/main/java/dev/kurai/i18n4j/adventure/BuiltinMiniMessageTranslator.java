@@ -21,7 +21,7 @@ public final class BuiltinMiniMessageTranslator extends MiniMessageTranslator {
   @Override
   protected @Nullable String getMiniMessageString(final String key, final Locale locale) {
     final Translation translation =
-        this.translationStore.findByKeyAndLocale(translationKey(key), locale);
+        this.translationStore.findByKeyAndLocale(key, locale);
 
     if (translation == null) {
       return null;
