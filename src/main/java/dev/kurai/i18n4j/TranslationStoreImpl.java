@@ -17,7 +17,7 @@ final class TranslationStoreImpl implements TranslationStore {
       TRANSLATION_KEY_CANNOT_BE_NULL = "Translation key cannot be null",
       LOCALE_CANNOT_BE_NULL = "Locale cannot be null";
 
-  private final Table<TranslationKey, Locale, Translation> translations;
+  private final Table<String, Locale, Translation> translations;
   private final Collection<Translation> translationsView =
       Collections.unmodifiableCollection((this.translations = HashBasedTable.create()).values());
 
@@ -28,6 +28,13 @@ final class TranslationStoreImpl implements TranslationStore {
 
   @Override
   public Collection<Translation> findAllByKey(final TranslationKey translationKey) {
+    return this.translations
+        .row(requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL).key())
+        .values();
+  }
+
+  @Override
+  public Collection<Translation> findAllByKey(final String translationKey) {
     return this.translations
         .row(requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL))
         .values();
@@ -49,7 +56,7 @@ final class TranslationStoreImpl implements TranslationStore {
       throw new IllegalArgumentException("Translation already exists");
     }
 
-    this.translations.put(translationKey, locale, translation);
+    this.translations.put(translationKey.key(), locale, translation);
   }
 
   @Override
@@ -77,7 +84,7 @@ final class TranslationStoreImpl implements TranslationStore {
       throw new IllegalArgumentException("Translation does not exist");
     }
 
-    this.translations.put(translationKey, locale, translation);
+    this.translations.put(translationKey.key(), locale, translation);
   }
 
   @Override
@@ -96,6 +103,11 @@ final class TranslationStoreImpl implements TranslationStore {
 
   @Override
   public void deleteByKey(final TranslationKey translationKey) {
+    this.deleteByKey(requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL).key());
+  }
+
+  @Override
+  public void deleteByKey(final String translationKey) {
     this.translations.row(requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL)).clear();
   }
 
@@ -106,6 +118,12 @@ final class TranslationStoreImpl implements TranslationStore {
 
   @Override
   public void deleteByKeyAndLocale(final TranslationKey translationKey, final Locale locale) {
+    this.deleteByKeyAndLocale(
+        requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL).key(), locale);
+  }
+
+  @Override
+  public void deleteByKeyAndLocale(final String translationKey, final Locale locale) {
     this.translations.remove(
         requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL),
         requireNonNull(locale, LOCALE_CANNOT_BE_NULL));
@@ -113,13 +131,20 @@ final class TranslationStoreImpl implements TranslationStore {
 
   private boolean exists(final TranslationKey translationKey, final Locale locale) {
     return this.translations.contains(
-        requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL),
+        requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL).key(),
         requireNonNull(locale, LOCALE_CANNOT_BE_NULL));
   }
 
   @Override
   public @Nullable Translation findByKeyAndLocale(
       final TranslationKey translationKey, final Locale locale) {
+    return this.findByKeyAndLocale(
+        requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL).key(), locale);
+  }
+
+  @Override
+  public @Nullable Translation findByKeyAndLocale(
+      final String translationKey, final Locale locale) {
     return this.translations.get(
         requireNonNull(translationKey, TRANSLATION_KEY_CANNOT_BE_NULL),
         requireNonNull(locale, LOCALE_CANNOT_BE_NULL));

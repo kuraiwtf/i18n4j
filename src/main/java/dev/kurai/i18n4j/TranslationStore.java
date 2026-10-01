@@ -29,12 +29,14 @@ public sealed interface TranslationStore permits TranslationStoreImpl {
   Collection<Translation> findAll();
 
   /**
-   * Returns every translation held by this store for the given key, regardless of locale.
+   * Returns every translation held by this store for the given translationKey, regardless of locale.
    *
-   * @param key the key to look up
-   * @return the translations stored under the given key
+   * @param translationKey the translationKey to look up
+   * @return the translations stored under the given translationKey
    */
-  Collection<Translation> findAllByKey(final TranslationKey key);
+  Collection<Translation> findAllByKey(final TranslationKey translationKey);
+
+  Collection<Translation> findAllByKey(final String translationKey);
 
   /**
    * Returns every translation held by this store for the given locale, regardless of key.
@@ -97,11 +99,13 @@ public sealed interface TranslationStore permits TranslationStoreImpl {
   void updateMany(final Iterable<Translation> translations);
 
   /**
-   * Removes every translation stored under the given key, regardless of locale.
+   * Removes every translation stored under the given translationKey, regardless of locale.
    *
-   * @param key the key to remove
+   * @param translationKey the translationKey to remove
    */
-  void deleteByKey(final TranslationKey key);
+  void deleteByKey(final TranslationKey translationKey);
+
+  void deleteByKey(final String translationKey);
 
   /**
    * Removes every translation stored under the given locale, regardless of key.
@@ -111,20 +115,31 @@ public sealed interface TranslationStore permits TranslationStoreImpl {
   void deleteByLocale(final Locale locale);
 
   /**
-   * Removes the translation stored under the given key and locale, if any.
+   * Removes the translation stored under the given translationKey and locale, if any.
    *
-   * @param key the key to remove
+   * @param translationKey the translationKey to remove
    * @param locale the locale to remove
    */
-  void deleteByKeyAndLocale(final TranslationKey key, final Locale locale);
+  void deleteByKeyAndLocale(final TranslationKey translationKey, final Locale locale);
+
+  void deleteByKeyAndLocale(final String translationKey, final Locale locale);
 
   /**
-   * Returns the translation stored under the given key and locale, or a fallback translation
-   * whose content is the key itself if none exists.
+   * Returns the translation stored under the given translationKey and locale, or a fallback translation
+   * whose content is the translationKey itself if none exists.
    *
-   * @param key the key to look up
+   * @param translationKey the translationKey to look up
    * @param locale the locale to look up
    * @return the matching translation, or a fallback translation if none is stored
    */
-  @Nullable Translation findByKeyAndLocale(final TranslationKey key, final Locale locale);
+  @Nullable Translation findByKeyAndLocale(final TranslationKey translationKey, final Locale locale);
+
+  /**
+   * Returns the translation stored under the given translationKey and locale.
+   *
+   * @param translationKey the translationKey to look up
+   * @param locale the locale to look up
+   * @return the matching translation if present, or {@code null} if none is stored
+   */
+  @Nullable Translation findByKeyAndLocale(final String translationKey, final Locale locale);
 }
